@@ -34,9 +34,11 @@ export type Profile = {
 }
 
 export type Booking = {
+  _id?: string;
   guestName: string;
   guestEmail: string;
   guestNotes: string;
   when: Date;
-  eventTypeId: string
+  eventTypeId: string;
+  nylasEventId: string;
 }

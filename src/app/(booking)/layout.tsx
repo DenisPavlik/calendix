@@ -1,13 +1,13 @@
 import { Toaster } from "react-hot-toast";
 import "./../globals.css";
-import { Noto_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 
 export const metadata = {
   title: "Calendly",
   description: "This is a clone of Calendly",
 };
 
-const noto = Noto_Sans({ subsets: ["latin"], weight: ["300", "400", "600", "700"] });
+const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={noto.className}>
+      <body className={inter.className}>
         <Toaster />
         {children}
       </body>

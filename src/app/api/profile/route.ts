@@ -17,6 +17,11 @@ export async function PUT(req: NextRequest) {
       return new Response("Missing username", { status: 400 });
     }
 
+    const FORMAT_RE = /^[a-z0-9-]{3,30}$/;
+    if (!FORMAT_RE.test(username)) {
+      return new Response("Invalid username: use 3–30 lowercase letters, numbers, or hyphens", { status: 400 });
+    }
+
     const profileDoc = await ProfileModel.findOne({email})
     if (profileDoc) {
       profileDoc.username = username;

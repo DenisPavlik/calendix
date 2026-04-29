@@ -1,5 +1,5 @@
 {
-  "name": "calendly",
+  "name": "calendix",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -23,7 +23,8 @@
     "react-dom": "^18",
     "react-fast-marquee": "^1.6.5",
     "react-hot-toast": "^2.5.2",
-    "react-spinners": "^0.17.0"
+    "react-spinners": "^0.17.0",
+    "resend": "^6.12.2"
   },
   "devDependencies": {
     "typescript": "^5",

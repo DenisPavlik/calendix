@@ -7,6 +7,7 @@ const BookingSchema = new Schema<Booking>({
   guestNotes: String,
   when: Date,
   eventTypeId: String,
+  nylasEventId: String,
 });
 
 export const BookingModel =

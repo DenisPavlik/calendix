@@ -18,25 +18,31 @@ export async function GET(req: NextRequest) {
     return Response.json("invalid username and/or bookingUri", { status: 404 });
   }
 
-  const nylasBusyResult = await nylas.calendars.getFreeBusy({
-    identifier: profileDoc.grantId,
-    requestBody: {
-      emails: [profileDoc.email],
-      startTime: Math.round(from.getTime() / 1000),
-      endTime: Math.round(to.getTime() / 1000),
-    }
-  })
-
   let busySlots: TimeSlot[] = [];
-  
-  if (nylasBusyResult.data?.[0]) {
-    // @ts-ignore
-    const slots = nylasBusyResult.data?.[0]?.timeSlots as TimeSlot[];
-    // @ts-ignore
-    busySlots = slots.filter(slot => slot.status === 'busy');
+
+  try {
+    const nylasBusyResult = await nylas.calendars.getFreeBusy({
+      identifier: profileDoc.grantId,
+      requestBody: {
+        emails: [profileDoc.email],
+        startTime: Math.round(from.getTime() / 1000),
+        endTime: Math.round(to.getTime() / 1000),
+      }
+    });
+
+    if (nylasBusyResult.data?.[0]) {
+      // @ts-ignore
+      const slots = nylasBusyResult.data?.[0]?.timeSlots as TimeSlot[];
+      // @ts-ignore
+      busySlots = slots.filter(slot => slot.status === 'busy');
+    }
+  } catch (nylasErr: unknown) {
+    const statusCode = (nylasErr as { statusCode?: number })?.statusCode;
+    if (statusCode === 401) {
+      return Response.json({ error: "calendar_disconnected" }, { status: 503 });
+    }
+    return Response.json({ error: "Calendar error" }, { status: 500 });
   }
 
-  return Response.json(
-    busySlots
-  )
+  return Response.json(busySlots);
 }
