@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://calendix-booking.vercel.app"),
   title: "Dashboard — Calendix",
 };
 
