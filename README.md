@@ -10,7 +10,7 @@
 
 A full-featured Calendly alternative built with the modern Next.js App Router stack. Hosts connect their Google Calendar via OAuth, create event types with custom availability windows, and share a booking link — guests pick a time, fill in their details, and a Google Meet event is automatically created.
 
-**Live demo:** [https://calendix.vercel.app](https://calendix.vercel.app) ← _replace with your URL_
+**Live demo:** [https://calendix-booking.vercel.app](https://calendix-booking.vercel.app)
 
 ---
 
