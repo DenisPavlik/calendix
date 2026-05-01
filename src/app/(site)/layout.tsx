@@ -16,16 +16,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Calendix — Simple scheduling for everyone",
     description,
-    url: "https://calendix.vercel.app",
+    url: "https://calendix-booking.vercel.app",
     siteName: "Calendix",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Calendix" }],
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Calendix" }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Calendix — Simple scheduling for everyone",
     description,
-    images: ["/opengraph-image"],
+    images: ["/opengraph-image.png"],
   },
 };
 
