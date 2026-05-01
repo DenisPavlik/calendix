@@ -148,3 +148,42 @@ This is a Calendly clone being modernized for a portfolio. Work is divided into 
 - [x] `CancelBookingButton.test.tsx` — modal open/close; DELETE call; loading state; toast
 - [x] `ProfileForm.test.tsx` — regex validation; debounce 450ms; submit з axios.put
 - [x] `TimePicker.test.tsx` — calendar grid; навігація місяці; вибір дня → busy fetch; checkBusySlots логіка
+
+---
+
+## Production Bug Note — Logout clears session unexpectedly
+
+During Vercel production testing, login through Nylas works and the session cookie is created correctly. The user can open `/dashboard`.
+
+However, when navigating inside dashboard routes such as `/dashboard/event-types` or `/dashboard/booked-events`, the user can be unexpectedly logged out and redirected back to the public site.
+
+Network debugging showed unexpected requests to `/api/logout?_rsc=...`.
+
+Likely cause:
+Logout is exposed in the UI as a normal URL using `href="/api/logout"`. Since `/api/logout` destroys the session cookie, any accidental GET request, route discovery, prefetch, or RSC navigation request can clear the session without the user intentionally clicking Log out.
+
+Important rule:
+Do not expose logout as a normal link.
+
+Avoid:
+- `<Link href="/api/logout">Log out</Link>`
+- `<a href="/api/logout">Log out</a>`
+
+Recommended fix:
+- Replace logout links in `Header.tsx` and `DashboardNav.tsx` with an explicit client-side logout button.
+- The button should call `fetch("/api/logout", { method: "POST" })`.
+- After successful logout, redirect to `/` and refresh the router.
+- Update `src/app/api/logout/route.ts` so session destruction happens only on `POST`.
+- Make `GET /api/logout` return `405 Method Not Allowed` or a harmless redirect without destroying the session.
+- Update logout tests accordingly.
+
+Files to inspect:
+- `src/app/components/Header.tsx`
+- `src/app/components/DashboardNav.tsx`
+- `src/app/api/logout/route.ts`
+- `src/__tests__/api/logout.test.ts`
+
+Goal:
+Logout must only happen when the user intentionally clicks the logout button. Navigation, prefetching, or RSC requests must never clear the session.
+
+---

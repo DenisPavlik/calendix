@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import { motion, LayoutGroup } from "framer-motion";
 import { CalendarDays, CalendarCheck2, User, LogOut, Globe } from "lucide-react";
@@ -13,7 +13,14 @@ const allNavItems = [
 
 export default function DashboardNav({ username }: { username?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
   const items = username ? allNavItems : allNavItems.slice(0, 1);
+
+  async function handleLogout() {
+    await fetch("/api/logout", { method: "POST" });
+    router.push("/");
+    router.refresh();
+  }
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
@@ -67,13 +74,13 @@ export default function DashboardNav({ username }: { username?: string }) {
             <Globe size={18} />
             Go to site
           </Link>
-          <Link
-            href="/api/logout"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors w-full text-left"
           >
             <LogOut size={18} />
             Log out
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -113,13 +120,13 @@ export default function DashboardNav({ username }: { username?: string }) {
           <Globe size={20} />
           Site
         </Link>
-        <Link
-          href="/api/logout"
+        <button
+          onClick={handleLogout}
           className="flex flex-col items-center gap-1 py-2 px-4 rounded-xl text-xs font-medium text-gray-500"
         >
           <LogOut size={20} />
           Log out
-        </Link>
+        </button>
       </nav>
     </>
   );

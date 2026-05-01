@@ -2,7 +2,7 @@
 
 import { CalendarDays, Menu, X, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,7 +36,14 @@ const navItemVariants = {
 
 export default function Header({ email }: { email?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  async function handleLogout() {
+    await fetch("/api/logout", { method: "POST" });
+    router.push("/");
+    router.refresh();
+  }
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -85,12 +92,12 @@ export default function Header({ email }: { email?: string }) {
                 <Link href="/dashboard" className="btn btn-primary">
                   Dashboard
                 </Link>
-                <a
-                  href="/api/logout"
+                <button
+                  onClick={handleLogout}
                   className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
                 >
                   Log out
-                </a>
+                </button>
               </>
             ) : (
               <>
@@ -229,12 +236,12 @@ export default function Header({ email }: { email?: string }) {
                     >
                       Dashboard
                     </Link>
-                    <a
-                      href="/api/logout"
+                    <button
+                      onClick={handleLogout}
                       className="text-center text-sm text-gray-500 hover:text-gray-900 transition-colors py-2"
                     >
                       Log out
-                    </a>
+                    </button>
                   </>
                 ) : (
                   <>
