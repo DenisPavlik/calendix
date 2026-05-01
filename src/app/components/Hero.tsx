@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { motion } from "framer-motion";
 import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -18,13 +19,23 @@ export default function Hero() {
   return (
     <section className="text-center pt-16 pb-8">
       {/* Badge */}
-      <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-700 text-sm px-4 py-1.5 rounded-full mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-700 text-sm px-4 py-1.5 rounded-full mb-8"
+      >
         <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />
         Open-source scheduling platform
-      </div>
+      </motion.div>
 
       {/* Headline */}
-      <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight text-gray-900">
+      <motion.h1
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, delay: 0.1, ease: "easeOut" }}
+        className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight text-gray-900"
+      >
         Scheduling{" "}
         <span
           className={clsx(
@@ -36,26 +47,41 @@ export default function Hero() {
         </span>
         <br />
         for people like you
-      </h1>
+      </motion.h1>
 
       {/* Subheading */}
-      <p className="text-lg text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
+      <motion.p
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.22, ease: "easeOut" }}
+        className="text-lg text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed"
+      >
         Share a link, let others pick a time. Calendix syncs with your Google
         Calendar and creates meetings automatically — zero back-and-forth.
-      </p>
+      </motion.p>
 
       {/* CTAs */}
-      <div className="flex gap-3 justify-center flex-wrap mb-16">
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.34, ease: "easeOut" }}
+        className="flex gap-3 justify-center flex-wrap mb-16"
+      >
         <Link href="/dashboard" className="btn btn-primary">
           Get started for free
         </Link>
         <Link href="/features" className="btn btn-outline">
           See how it works
         </Link>
-      </div>
+      </motion.div>
 
       {/* Mock booking UI */}
-      <div className="relative mx-auto max-w-lg">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.46, ease: "easeOut" }}
+        className="relative mx-auto max-w-lg"
+      >
         {/* Glow behind card */}
         <div className="absolute -z-10 inset-x-8 bottom-0 h-24 bg-blue-400/30 blur-3xl rounded-full" />
 
@@ -117,7 +143,7 @@ export default function Hero() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

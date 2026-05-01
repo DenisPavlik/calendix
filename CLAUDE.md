@@ -90,7 +90,7 @@ This is a Calendly clone being modernized for a portfolio. Work is divided into 
 > Goal: make the app actually work better and cover edge cases.
 
 - [x] Move auth guard from layout render to `middleware.ts` (protect `/dashboard/*` at edge)
-- [ ] Add timezone support — store timezone in Profile, show local time in booking flow
+- [x] Add timezone support — store timezone in Profile, show local time in booking flow
 - [x] Add booking cancellation — host cancels from dashboard, guest receives cancellation email
 - [x] Add email notifications — send confirmation email to guest after booking (use Nylas or Resend)
 - [x] Validate username format (slug: lowercase, letters/numbers/hyphens only) before saving
@@ -100,19 +100,51 @@ This is a Calendly clone being modernized for a portfolio. Work is divided into 
 ### Phase 4 — Performance & Code Quality
 > Goal: production-ready code, good Lighthouse score.
 
-- [ ] Add `loading.tsx` files for all dashboard routes (Next.js Suspense streaming)
-- [ ] Add `error.tsx` boundaries for dashboard and booking routes
-- [ ] Convert `EventTypesPage` and `BookedEventsPage` to use `Suspense` + async Server Components properly
-- [ ] Lazy-load heavy client components (`TimePicker`, `EventTypeForm`) with `dynamic()` + `ssr: false`
-- [ ] Add `next/image` optimization for all external images (company logos in `Companies.tsx` already use it — verify `remotePatterns` in `next.config`)
-- [ ] Remove dead commented-out code (`next-app-session` remnants in `session.ts`, `oauth/exchange/route.ts`)
-- [ ] Add proper TypeScript strict checks — fix `@ts-ignore` in `busy/route.ts`
-- [ ] Set up `next.config.ts` with `images.remotePatterns` for ctfassets.net logos
+- [x] Add `loading.tsx` files for all dashboard routes (Next.js Suspense streaming)
+- [x] Add `error.tsx` boundaries for dashboard and booking routes
+- [x] Convert `EventTypesPage` and `BookedEventsPage` to use `Suspense` + async Server Components properly
+- [x] Lazy-load heavy client components (`TimePicker`, `EventTypeForm`) with `dynamic()` + `ssr: false`
+- [x] Add `next/image` optimization for all external images (company logos in `Companies.tsx` already use it — verify `remotePatterns` in `next.config`)
+- [x] Remove dead commented-out code (`next-app-session` remnants in `session.ts`, `oauth/exchange/route.ts`)
+- [x] Add proper TypeScript strict checks — fix `@ts-ignore` in `busy/route.ts`
+- [x] Set up `next.config.ts` with `images.remotePatterns` for ctfassets.net logos
 
 ### Phase 5 — Polish & Deploy
 > Goal: ready to show and share.
 
-- [ ] Add `og:image` and proper metadata for all public pages
-- [ ] Add a demo mode / seed script so the booking flow works without a real Nylas account
-- [ ] Deploy to Vercel, add live URL to README and About page
-- [ ] Record a short screen-capture demo GIF for the README
+- [x] Add `og:image` and proper metadata for all public pages
+- [x] Write a professional README.md for the project
+- [x] App is already deployed — add live URL to README (placeholder added, replace with real URL)
+
+### Phase 6 — Testing
+> Goal: покрити всі критичні шари тестами (API routes, утиліти, middleware, компоненти).
+> Stack: Vitest + @testing-library/react + msw. Пакети вже встановлені.
+
+#### Інфраструктура
+- [x] Встановити dev-залежності (`vitest`, `@vitejs/plugin-react`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `jsdom`, `msw`)
+- [x] Створити `vitest.config.ts` (корінь проєкту)
+- [x] Додати test-scripts у `package.json` (`test`, `test:watch`, `test:coverage`)
+- [x] Створити `src/__tests__/setup.ts` (jest-dom матчери + MSW lifecycle + HTMLDialogElement polyfill)
+- [x] Створити `src/__tests__/msw/server.ts`
+
+#### Тести утиліт (`src/__tests__/libs/`)
+- [x] `shared.test.ts` — WeekdaysNames (7 елементів, порядок), shortWeekdays (3 літери)
+- [x] `db-utils.test.ts` — getUsernameByEmail: знайдено / не знайдено / правильний email
+
+#### Тест middleware (`src/__tests__/middleware/`)
+- [x] `middleware.test.ts` — redirect без session.email; pass-through з email; matcher config
+
+#### Тести API routes (`src/__tests__/api/`)
+- [x] `logout.test.ts` — session.destroy викликається; redirect на /
+- [x] `profile.test.ts` — regex validation; 401 без сесії; upsert логіка
+- [x] `event-types.test.ts` — URI normalization; GET/POST/PUT/DELETE; 409 дублікат; ownership
+- [x] `busy.test.ts` — 404 невідомий username; Nylas 401 → 503; фільтрація busy-слотів
+- [x] `oauth-exchange.test.ts` — нова Profile; оновлення grantId; session.email; redirect
+- [x] `bookings-create.test.ts` — відсутні поля → 400; неправильний username → 404; успіх → 201; Nylas 401 → 503
+- [x] `bookings-cancel.test.ts` — 401/403/404; пряме видалення по nylasEventId; fallback; Nylas 404 ігнорується
+
+#### Тести компонентів (`src/__tests__/components/`)
+- [x] `CopyButton.test.tsx` — clipboard.writeText; іконка змінюється; реверт через 2с
+- [x] `CancelBookingButton.test.tsx` — modal open/close; DELETE call; loading state; toast
+- [x] `ProfileForm.test.tsx` — regex validation; debounce 450ms; submit з axios.put
+- [x] `TimePicker.test.tsx` — calendar grid; навігація місяці; вибір дня → busy fetch; checkBusySlots логіка

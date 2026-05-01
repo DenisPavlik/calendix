@@ -22,12 +22,12 @@ function buildICS(start: Date, end: Date, title: string): string {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Calendly Clone//EN",
+    "PRODID:-//Calendix//EN",
     "BEGIN:VEVENT",
     `DTSTART:${formatICS(start)}`,
     `DTEND:${formatICS(end)}`,
     `SUMMARY:${title}`,
-    "DESCRIPTION:Booking confirmed via Calendly Clone",
+    "DESCRIPTION:Booking confirmed via Calendix",
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");
@@ -39,7 +39,7 @@ function buildGoogleCalendarUrl(start: Date, end: Date, title: string): string {
     action: "TEMPLATE",
     text: title,
     dates: `${fmt(start)}/${fmt(end)}`,
-    details: "Booking confirmed via Calendly Clone",
+    details: "Booking confirmed via Calendix",
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }

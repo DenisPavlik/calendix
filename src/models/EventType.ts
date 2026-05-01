@@ -1,6 +1,5 @@
 import { EventType, FromTo, WeekdayName } from "@/types/types";
 import mongoose, { model, Schema } from "mongoose";
-import { ST } from "next/dist/shared/lib/utils";
 
 const FromToSchema = new Schema<FromTo>({
   from: String,
@@ -31,6 +30,8 @@ const EventTypeSchema = new Schema(
     timestamps: true,
   }
 );
+
+EventTypeSchema.index({ email: 1, uri: 1 }, { unique: true });
 
 export const EventTypeModel =
   mongoose.models?.EventType || model<EventType>("EventType", EventTypeSchema);

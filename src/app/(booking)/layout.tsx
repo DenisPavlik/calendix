@@ -3,8 +3,8 @@ import "./../globals.css";
 import { Inter } from "next/font/google";
 
 export const metadata = {
-  title: "Calendly",
-  description: "This is a clone of Calendly",
+  title: "Calendix",
+  description: "Simple scheduling for everyone — share a link, let others pick a time.",
 };
 
 const inter = Inter({ subsets: ["latin"] });

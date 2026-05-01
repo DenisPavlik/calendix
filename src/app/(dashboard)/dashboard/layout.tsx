@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import DashboardNav from "@/app/components/DashboardNav";
 import { getSessionEmailFromCookies } from "@/libs/getSessionEmail";
 import { nylas } from "@/libs/nylas";
 import { ProfileModel } from "@/models/Profile";
 import { AlertTriangle } from "lucide-react";
 import { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  title: "Dashboard — Calendix",
+  description: "Manage your event types, availability, and bookings.",
+};
 
 async function checkGrantValid(grantId: string): Promise<boolean> {
   try {

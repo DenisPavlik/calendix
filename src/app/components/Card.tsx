@@ -1,5 +1,8 @@
+"use client";
+
 import { Check } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 type CardProps = {
   title: string;
@@ -11,6 +14,41 @@ type CardProps = {
   featuresLabel: string;
   popular?: boolean;
 };
+
+function AnimatedPrice({
+  value,
+  billing,
+  className,
+}: {
+  value: string;
+  billing: "monthly" | "yearly";
+  className: string;
+}) {
+  const [animKey, setAnimKey] = useState(0);
+  const [displayed, setDisplayed] = useState(value);
+  const [direction, setDirection] = useState<"up" | "down">("up");
+  const prevBilling = useRef(billing);
+
+  useEffect(() => {
+    if (billing !== prevBilling.current) {
+      setDirection(billing === "yearly" ? "up" : "down");
+      setAnimKey((k) => k + 1);
+      setDisplayed(value);
+      prevBilling.current = billing;
+    }
+  }, [billing, value]);
+
+  return (
+    <span className="inline-block overflow-hidden leading-none">
+      <span
+        key={animKey}
+        className={`inline-block ${direction === "up" ? "price-roll-up" : "price-roll-down"} ${className}`}
+      >
+        {displayed}
+      </span>
+    </span>
+  );
+}
 
 export default function Card({
   title,
@@ -55,44 +93,51 @@ export default function Card({
         </p>
       </div>
 
-      {/* Price */}
-      <div className="mb-6">
+      {/* Price — fixed height so all cards stay the same */}
+      <div className="mb-6 h-16 flex flex-col justify-start">
         <div className="flex items-end gap-1">
-          <span
-            className={`text-4xl font-bold ${
-              popular ? "text-white" : "text-gray-900"
-            }`}
-          >
-            {price}
-          </span>
-          {!isFree && (
+          {isFree ? (
             <span
-              className={`text-sm mb-1.5 ${
-                popular ? "text-blue-100" : "text-gray-400"
+              className={`text-4xl font-bold leading-none ${
+                popular ? "text-white" : "text-gray-900"
               }`}
             >
-              / mo
+              Free
             </span>
+          ) : (
+            <>
+              <AnimatedPrice
+                value={price}
+                billing={billing}
+                className={`text-4xl font-bold leading-none ${
+                  popular ? "text-white" : "text-gray-900"
+                }`}
+              />
+              <span
+                className={`text-sm mb-1 ${
+                  popular ? "text-blue-100" : "text-gray-400"
+                }`}
+              >
+                / mo
+              </span>
+            </>
           )}
         </div>
-        {!isFree && billing === "yearly" && (
-          <p
-            className={`text-xs mt-1 ${
-              popular ? "text-blue-100" : "text-gray-400"
-            }`}
-          >
-            Billed annually
-          </p>
-        )}
+        {/* Always rendered — invisible when not yearly so height is stable */}
+        <p
+          className={`text-xs mt-1.5 transition-opacity duration-300 ${
+            !isFree && billing === "yearly" ? "opacity-100" : "invisible"
+          } ${popular ? "text-blue-100" : "text-gray-400"}`}
+        >
+          Billed annually
+        </p>
       </div>
 
       {/* CTA */}
       <Link
         href="/dashboard"
         className={`btn justify-center mb-8 ${
-          popular
-            ? "bg-white text-blue-600 hover:bg-blue-50"
-            : "btn-primary"
+          popular ? "bg-white text-blue-600 hover:bg-blue-50" : "btn-primary"
         }`}
       >
         Get started

@@ -1,4 +1,5 @@
 "use client";
+import { motion, AnimatePresence } from "framer-motion";
 import { shortWeekdays } from "@/libs/shared";
 import { BookingTimes, WeekdayName } from "@/types/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -7,7 +8,6 @@ import {
   addDays,
   addMinutes,
   addMonths,
-  endOfDay,
   format,
   getDay,
   isAfter,
@@ -19,6 +19,7 @@ import {
   startOfDay,
   subMonths,
 } from "date-fns";
+import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
 import clsx from "clsx";
 import Link from "next/link";
 import axios from "axios";
@@ -30,11 +31,13 @@ export default function TimePicker({
   length,
   username,
   meetingUri,
+  hostTimezone,
 }: {
   bookingTimes: BookingTimes;
   length: number;
   username: string;
   meetingUri: string;
+  hostTimezone: string;
 }) {
   const currentDate = new Date();
   const [activeMonthDate, setActiveMonthDate] = useState(currentDate);
@@ -47,15 +50,23 @@ export default function TimePicker({
   const [busySlotsLoaded, setBusySlotsLoaded] = useState(false);
   const [calendarDisconnected, setCalendarDisconnected] = useState(false);
 
+  const guestTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   useEffect(() => {
     if (selectedDay) {
       setBusySlots([]);
       setBusySlotsLoaded(false);
       setCalendarDisconnected(false);
+
+      const dayStr = format(selectedDay, "yyyy-MM-dd");
+      const hostDayStart = fromZonedTime(`${dayStr}T00:00:00`, hostTimezone);
+      const hostDayEnd = fromZonedTime(`${dayStr}T23:59:59`, hostTimezone);
+
       const params = new URLSearchParams();
       params.set("username", username);
-      params.set("from", startOfDay(selectedDay).toISOString());
-      params.set("to", endOfDay(selectedDay).toISOString());
+      params.set("from", hostDayStart.toISOString());
+      params.set("to", hostDayEnd.toISOString());
+
       axios.get("/api/busy?" + params.toString())
         .then((response) => {
           setBusySlots(response.data);
@@ -68,7 +79,7 @@ export default function TimePicker({
           setBusySlotsLoaded(true);
         });
     }
-  }, [selectedDay, username]);
+  }, [selectedDay, username, hostTimezone]);
 
   function checkBusySlots(time: Date) {
     const bookingFrom = time;
@@ -102,20 +113,21 @@ export default function TimePicker({
   const bookingHours: Date[] = [];
   let selectedDayConfig = null;
   if (selectedDay) {
-    const weekdayNameIndex = format(selectedDay, "EEEE").toLowerCase() as WeekdayName;
-    selectedDayConfig = bookingTimes?.[weekdayNameIndex];
+    const weekdayName = format(selectedDay, "EEEE").toLowerCase() as WeekdayName;
+    selectedDayConfig = bookingTimes?.[weekdayName];
 
-    if (selectedDayConfig) {
-      const [hoursFrom, minutesFrom] = selectedDayConfig.from.split(":");
-      const [hoursTo, minutesTo] = selectedDayConfig.to.split(":");
+    if (selectedDayConfig?.active) {
+      const dayStr = format(selectedDay, "yyyy-MM-dd");
 
-      const selectedDayFrom = new Date(selectedDay);
-      selectedDayFrom.setHours(parseInt(hoursFrom));
-      selectedDayFrom.setMinutes(parseInt(minutesFrom));
-
-      const selectedDayTo = new Date(selectedDay);
-      selectedDayTo.setHours(parseInt(hoursTo));
-      selectedDayTo.setMinutes(parseInt(minutesTo));
+      // Create slot boundaries in host timezone → UTC Date objects
+      const selectedDayFrom = fromZonedTime(
+        `${dayStr}T${selectedDayConfig.from}:00`,
+        hostTimezone
+      );
+      const selectedDayTo = fromZonedTime(
+        `${dayStr}T${selectedDayConfig.to}:00`,
+        hostTimezone
+      );
 
       let a = selectedDayFrom;
       do {
@@ -180,10 +192,10 @@ export default function TimePicker({
             <div key={index} />
           ))}
           {daysNumbers.map((n, index) => {
-            const weekdayNameIndex = format(n, "EEEE").toLocaleLowerCase() as WeekdayName;
-            const weekDayConfig = bookingTimes?.[weekdayNameIndex];
+            const weekdayName = format(n, "EEEE").toLocaleLowerCase() as WeekdayName;
+            const weekDayConfig = bookingTimes?.[weekdayName];
             const isActiveInBookingTimes = weekDayConfig?.active;
-            const canBeBooked = isFuture(n) && isActiveInBookingTimes;
+            const canBeBooked = isFuture(startOfDay(addDays(n, 1))) && isActiveInBookingTimes;
             const isSelected = selectedDay && isEqual(n, selectedDay);
             const today = isToday(n);
 
@@ -214,9 +226,13 @@ export default function TimePicker({
       {/* Time slots panel */}
       {selectedDay && (
         <div className="sm:w-52 border-t sm:border-t-0 sm:border-l border-gray-100 p-6">
-          <p className="text-sm font-semibold text-gray-700 mb-3">
+          <p className="text-sm font-semibold text-gray-700 mb-1">
             {format(selectedDay, "EEE, MMM d")}
           </p>
+          {guestTimezone !== hostTimezone && (
+            <p className="text-xs text-gray-400 mb-3">{guestTimezone.replace(/_/g, " ")}</p>
+          )}
+          {guestTimezone === hostTimezone && <div className="mb-3" />}
           <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
             {!busySlotsLoaded && <Preloader />}
             {busySlotsLoaded && calendarDisconnected && (
@@ -229,18 +245,34 @@ export default function TimePicker({
                 No slots available
               </p>
             )}
-            {busySlotsLoaded && !calendarDisconnected &&
-              bookingHours.map((bookingTime, index) => (
-                <Link
-                  key={index}
-                  href={`/${username}/${meetingUri}/${bookingTime.toISOString()}?length=${length}`}
-                  className="block text-center px-4 py-2.5 rounded-lg border-2 border-blue-600
-                    text-blue-600 text-sm font-semibold
-                    hover:bg-blue-600 hover:text-white transition-colors duration-200"
+            <AnimatePresence mode="wait">
+              {busySlotsLoaded && !calendarDisconnected && bookingHours.length > 0 && (
+                <motion.div
+                  key={selectedDay?.toISOString()}
+                  className="flex flex-col gap-2"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
                 >
-                  {format(bookingTime, "HH:mm")}
-                </Link>
-              ))}
+                  {bookingHours.map((bookingTime, index) => (
+                    <motion.div
+                      key={index}
+                      variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                    >
+                      <Link
+                        href={`/${username}/${meetingUri}/${bookingTime.toISOString()}?length=${length}`}
+                        className="block text-center px-4 py-2.5 rounded-lg border-2 border-blue-600
+                          text-blue-600 text-sm font-semibold
+                          hover:bg-blue-600 hover:text-white transition-colors duration-200"
+                      >
+                        {formatInTimeZone(bookingTime, guestTimezone, "HH:mm")}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       )}

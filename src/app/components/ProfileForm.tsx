@@ -8,8 +8,19 @@ import toast from "react-hot-toast";
 
 const FORMAT_RE = /^[a-z0-9-]{3,30}$/;
 
-export default function ProfileForm({ un }: { un?: string | null }) {
+const ALL_TIMEZONES = Intl.supportedValuesOf("timeZone");
+
+export default function ProfileForm({
+  un,
+  tz,
+}: {
+  un?: string | null;
+  tz?: string | null;
+}) {
   const [username, setUsername] = useState(un || "");
+  const [timezone, setTimezone] = useState(
+    tz || Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
   const [checking, setChecking] = useState(false);
   const [valid, setValid] = useState<boolean | null>(null);
   const router = useRouter();
@@ -31,7 +42,7 @@ export default function ProfileForm({ un }: { un?: string | null }) {
   async function handleSubmit(ev: FormEvent) {
     ev.preventDefault();
     try {
-      const response = await axios.put("/api/profile", { username });
+      const response = await axios.put("/api/profile", { username, timezone });
       if (response.status === 200) {
         toast.success("Profile saved!");
         router.refresh();
@@ -83,6 +94,22 @@ export default function ProfileForm({ un }: { un?: string | null }) {
             </div>
           </div>
           <p className="text-xs text-gray-400 mt-1.5">Min 3 chars, lowercase letters, numbers and hyphens.</p>
+        </label>
+
+        <label className="block">
+          <span>Timezone</span>
+          <select
+            value={timezone}
+            onChange={(e) => setTimezone(e.target.value)}
+            className="w-full"
+          >
+            {ALL_TIMEZONES.map((zone) => (
+              <option key={zone} value={zone}>{zone.replace(/_/g, " ")}</option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-400 mt-1.5">
+            Used to show correct availability times to your guests.
+          </p>
         </label>
 
         <button

@@ -44,8 +44,8 @@ export async function DELETE(
             identifier: profileDoc.grantId,
             queryParams: {
               calendarId: email,
-              start: startSec,
-              end: startSec + 300,
+              start: String(startSec),
+              end: String(startSec + 300),
             },
           });
           const match = events.data.find((e) => e.title === etDoc.title);

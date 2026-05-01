@@ -31,6 +31,7 @@ export type Profile = {
   email: string;
   username: string;
   grantId: string;
+  timezone?: string;
 }
 
 export type Booking = {

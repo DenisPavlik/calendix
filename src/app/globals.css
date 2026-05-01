@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Price roll animations */
+@keyframes price-roll-up {
+  from { transform: translateY(60%); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+@keyframes price-roll-down {
+  from { transform: translateY(-60%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.price-roll-up   { animation: price-roll-up   0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.price-roll-down { animation: price-roll-down 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
 /* Animated underline for hero headline */
 .cool-underline {
   position: relative;

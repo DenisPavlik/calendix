@@ -1,14 +1,14 @@
-"use server";
-
 import CancelBookingButton from "@/app/components/CancelBookingButton";
+import { StaggerItem, StaggerList } from "@/app/components/ui/FadeIn";
 import { connectToDB } from "@/libs/connectToDB";
 import { getSessionEmailFromCookies } from "@/libs/getSessionEmail";
 import { BookingModel } from "@/models/Booking";
 import { EventTypeModel } from "@/models/EventType";
 import { format, isPast } from "date-fns";
 import { CalendarDays, Clock, MessageSquare, User } from "lucide-react";
+import { Suspense } from "react";
 
-export default async function BookedEventsPage() {
+async function BookingsList() {
   await connectToDB();
   const email = await getSessionEmailFromCookies();
   const etDocs = await EventTypeModel.find({ email });
@@ -45,7 +45,6 @@ export default async function BookedEventsPage() {
                 <span className="text-xs text-gray-400">{etDoc.title}</span>
               )}
             </div>
-
             <div className="flex items-center gap-1.5 text-gray-900 font-semibold text-base">
               <User size={15} className="text-gray-400 flex-shrink-0" />
               <span className="truncate">{booking.guestName}</span>
@@ -53,7 +52,6 @@ export default async function BookedEventsPage() {
                 · {booking.guestEmail}
               </span>
             </div>
-
             {booking.guestNotes && (
               <p className="flex items-start gap-1.5 mt-2 text-sm text-gray-500">
                 <MessageSquare size={14} className="flex-shrink-0 mt-0.5 text-gray-400" />
@@ -61,7 +59,6 @@ export default async function BookedEventsPage() {
               </p>
             )}
           </div>
-
           <div className="flex-shrink-0 text-right">
             <div className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
               <CalendarDays size={14} className="text-gray-400" />
@@ -87,49 +84,93 @@ export default async function BookedEventsPage() {
     );
   }
 
+  if (bookings.length === 0) {
+    return (
+      <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+        <CalendarDays size={32} className="mx-auto text-gray-300 mb-3" />
+        <p className="text-gray-400 text-sm">No bookings yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <p className="text-sm text-gray-500 mb-6">
+        {bookings.length} total · {upcoming.length} upcoming
+      </p>
+      <div className="flex flex-col gap-8">
+        {upcoming.length > 0 && (
+          <section>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+              Upcoming
+            </h2>
+            <StaggerList className="flex flex-col gap-3">
+              {upcoming.map((b, i) => (
+                <StaggerItem key={i}>
+                  <BookingCard booking={b} />
+                </StaggerItem>
+              ))}
+            </StaggerList>
+          </section>
+        )}
+        {past.length > 0 && (
+          <section>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+              Past
+            </h2>
+            <StaggerList className="flex flex-col gap-3">
+              {past.map((b, i) => (
+                <StaggerItem key={i}>
+                  <BookingCard booking={b} />
+                </StaggerItem>
+              ))}
+            </StaggerList>
+          </section>
+        )}
+      </div>
+    </>
+  );
+}
+
+function BookingsListSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-4 bg-gray-100 rounded w-32 mb-6" />
+      <div className="h-3 bg-gray-200 rounded w-20 mb-3" />
+      <div className="flex flex-col gap-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-5 bg-gray-200 rounded-full w-16" />
+                  <div className="h-4 bg-gray-100 rounded w-20" />
+                </div>
+                <div className="h-5 bg-gray-200 rounded w-48 mb-2" />
+                <div className="h-4 bg-gray-100 rounded w-32" />
+              </div>
+              <div className="text-right flex-shrink-0">
+                <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
+                <div className="h-7 bg-gray-200 rounded w-16 mb-1" />
+                <div className="h-3 bg-gray-100 rounded w-12" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function BookedEventsPage() {
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Booked Events</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          {bookings.length} total · {upcoming.length} upcoming
-        </p>
       </div>
-
-      {bookings.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
-          <CalendarDays size={32} className="mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-400 text-sm">No bookings yet.</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-8">
-          {upcoming.length > 0 && (
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
-                Upcoming
-              </h2>
-              <div className="flex flex-col gap-3">
-                {upcoming.map((b, i) => (
-                  <BookingCard key={i} booking={b} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {past.length > 0 && (
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
-                Past
-              </h2>
-              <div className="flex flex-col gap-3">
-                {past.map((b, i) => (
-                  <BookingCard key={i} booking={b} />
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-      )}
+      <Suspense fallback={<BookingsListSkeleton />}>
+        <BookingsList />
+      </Suspense>
     </div>
   );
 }
