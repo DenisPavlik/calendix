@@ -31,12 +31,15 @@ export type Profile = {
   email: string;
   username: string;
   grantId: string;
+  timezone?: string;
 }
 
 export type Booking = {
+  _id?: string;
   guestName: string;
   guestEmail: string;
   guestNotes: string;
   when: Date;
-  eventTypeId: string
+  eventTypeId: string;
+  nylasEventId: string;
 }

@@ -12,17 +12,23 @@ export async function PUT(req: NextRequest) {
     }
 
     const data = await req.json();
-    const { username } = data;
+    const { username, timezone } = data;
     if (!username) {
       return new Response("Missing username", { status: 400 });
     }
 
-    const profileDoc = await ProfileModel.findOne({email})
+    const FORMAT_RE = /^[a-z0-9-]{3,30}$/;
+    if (!FORMAT_RE.test(username)) {
+      return new Response("Invalid username: use 3–30 lowercase letters, numbers, or hyphens", { status: 400 });
+    }
+
+    const profileDoc = await ProfileModel.findOne({ email });
     if (profileDoc) {
       profileDoc.username = username;
+      if (timezone) profileDoc.timezone = timezone;
       await profileDoc.save();
     } else {
-      await ProfileModel.create({email, username})
+      await ProfileModel.create({ email, username, timezone });
     }
 
     return new Response("Profile saved", { status: 200 });

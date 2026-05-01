@@ -2,24 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Price roll animations */
+@keyframes price-roll-up {
+  from { transform: translateY(60%); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+@keyframes price-roll-down {
+  from { transform: translateY(-60%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.price-roll-up   { animation: price-roll-up   0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.price-roll-down { animation: price-roll-down 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+/* Animated underline for hero headline */
 .cool-underline {
   position: relative;
+  display: inline-block; /* ensures ::after width:100% is calculated correctly */
 }
 .cool-underline::after {
   content: "";
   display: block;
   position: absolute;
-  height: 10px;
+  height: 0.28em;   /* scales with font size */
   width: 0%;
-  background-color: #2ecc71;
-  left: -8px;
-  bottom: 10px;
+  background-color: #93c5fd;
+  left: -4px;
+  bottom: 0.06em;   /* scales with font size */
   z-index: -1;
   transform: skew(-21deg);
-  transition: all 0.9s ease-in-out;
+  transition: width 0.9s ease-in-out;
 }
 .cool-underline.show-underline::after {
-  width: calc(100% + 16px);
+  width: calc(100% + 8px);
 }
 @media (max-width: 640px) {
   .cool-underline::after {
@@ -27,30 +52,71 @@
   }
 }
 
+@layer components {
+  /* Base button */
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50;
+  }
+
+  /* Filled blue */
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 shadow-sm;
+  }
+
+  /* Outlined */
+  .btn-outline {
+    @apply border border-gray-300 text-gray-700 bg-white hover:border-gray-400 hover:bg-gray-50;
+  }
+
+  /* Section badge (small pill label above titles) */
+  .section-badge {
+    @apply inline-block text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full;
+  }
+
+  /* Consistent section title */
+  .section-title {
+    @apply text-4xl font-bold text-gray-900 tracking-tight;
+  }
+
+  /* Consistent section subtitle */
+  .section-subtitle {
+    @apply text-lg text-gray-500 leading-relaxed;
+  }
+}
+
+/* ── Forms ── */
 form input[type="text"],
 form input[type="number"],
 form input[type="email"],
 form select,
 form textarea {
-  @apply border rounded-md;
+  @apply border border-gray-200 rounded-lg transition-colors duration-150;
 }
 
 form input[type="text"],
 form input[type="number"],
 form input[type="email"],
 form textarea {
-  @apply w-full block p-2;
+  @apply w-full block p-3;
+}
+
+form select {
+  @apply p-2;
+}
+
+form input[type="text"]:focus,
+form input[type="number"]:focus,
+form input[type="email"]:focus,
+form select:focus,
+form textarea:focus {
+  @apply outline-none ring-2 ring-blue-500/20 border-blue-400;
 }
 
 form label {
-  @apply mb-2 block p-1;
+  @apply mb-2 block;
 }
 
 form label span,
 span.label {
-  @apply text-xs font-bold uppercase text-gray-600;
-}
-
-.btn {
-  @apply inline-flex items-center gap-1 rounded-full px-2 sm:px-4 py-1 sm:py-2;
+  @apply text-xs font-semibold uppercase tracking-wide text-gray-500;
 }
