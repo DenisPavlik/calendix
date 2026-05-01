@@ -11,6 +11,7 @@ const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "
 const description = "Share a link, let others pick a time. Calendix connects to your Google Calendar and creates meetings automatically.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://calendix-booking.vercel.app"),
   title: "Calendix — Simple scheduling for everyone",
   description,
   openGraph: {
